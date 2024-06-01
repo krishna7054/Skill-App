@@ -2,6 +2,8 @@
 
 Skill App is a web application that allows users to register, log in, and manage their skills. It provides functionality for adding and removing skills and displays users and their respective skills.
 
+Live Link: https://prismatic-brigadeiros-14ae59.netlify.app
+
 ## Table of Contents
 - Features
 - File Structure
