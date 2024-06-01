@@ -7,6 +7,7 @@ const SkillForm = () => {
   const [input, setInput] = useState('');
   const [error, setError] = useState(null);
   const [skills, setSkills] = useState([]);
+  const [suggestions, setSuggestions] = useState([]);
 
   useEffect(() => {
     const fetchUserSkills = async () => {
@@ -21,7 +22,22 @@ const SkillForm = () => {
     fetchUserSkills();
   }, [userId]);
 
-  const onChange = (e) => setInput(e.target.value);
+  const onChange = async (e) => {
+    const value = e.target.value;
+    setInput(value);
+    if (value) {
+      try {
+        const response = await api.get(`/skills/suggest-skills?query=${value}`);
+        setSuggestions(response.data.skills);
+      } catch (error) {
+        console.error('Error fetching skill suggestions:', error);
+      }
+    } else {
+      setSuggestions([]);
+    }
+  };
+
+  
 
   const onSubmit = async (e) => {
     e.preventDefault();
@@ -35,10 +51,16 @@ const SkillForm = () => {
       const response = await api.post('/skills/add-skill', { name: input, userId }, config);
       setSkills([...skills, response.data]); // Update the skills list with the new skill
       setInput('');
+      setSuggestions([]); 
     } catch (err) {
       console.error(err);
       setError('Failed to add skill');
     }
+  };
+
+  const handleSelectSuggestion = (suggestion) => {
+    setInput(suggestion.name);
+    setSuggestions([]); // Clear suggestions after selecting one
   };
 
   const handleDelete = async (skillId) => {
@@ -72,6 +94,19 @@ const SkillForm = () => {
             placeholder="Enter skill"
             required
           />
+          {suggestions.length > 0 && (
+            <ul className="border border-gray-300 rounded mt-2">
+              {suggestions.map((suggestion) => (
+                <li
+                  key={suggestion._id}
+                  className="p-2 cursor-pointer hover:bg-gray-200"
+                  onClick={() => handleSelectSuggestion(suggestion)}
+                >
+                  {suggestion.name}
+                </li>
+              ))}
+            </ul>
+          )}
         </div>
         <button type="submit" className="w-full bg-blue-500 text-white p-2 rounded">
           Add Skill
